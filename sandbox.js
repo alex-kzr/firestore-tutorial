@@ -17,13 +17,26 @@ const addRecipe = (recipe, id) => {
     list.innerHTML += html;
 };
 
+const deleteRecipe = id => {
+    const recipes = document.querySelectorAll('li');
+    recipes.forEach(recipe => {
+        if(recipe.getAttribute('data-id') === id){
+            recipe.remove();
+        }
+    });
+    console.log(recipes);
+};
+
 // get documents
-db.collection('recipes').get().then(snapshot => {
-    snapshot.docs.forEach(doc => {
-        addRecipe(doc.data(), doc.id);
-    }); 
-}).catch(err => {
-    console.log(err);
+db.collection('recipes').onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+        if(change.type === 'added'){
+            addRecipe(change.doc.data(), change.doc.id);
+        }else if(change.type === 'removed'){
+            deleteRecipe(change.doc.id);
+        }
+    });
+    console.log(snapshot.docChanges());
 });
 
 // add documents
