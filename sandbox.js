@@ -6,11 +6,12 @@ const db = firebase.firestore();
 const list = document.querySelector('ul');
 const form = document.querySelector('form');
 
-const addRecipe = recipe => {
+const addRecipe = (recipe, id) => {
     let html = `
-        <li>
+        <li data-id="${id}">
             <div>${recipe.title}</div>
             <div>${recipe.created_at.toDate()}</div>
+            <button class="btn btn-danger btn-sm my-2">delete</button>
         </li>
     `;
     list.innerHTML += html;
@@ -19,7 +20,7 @@ const addRecipe = recipe => {
 // get documents
 db.collection('recipes').get().then(snapshot => {
     snapshot.docs.forEach(doc => {
-        addRecipe(doc.data());
+        addRecipe(doc.data(), doc.id);
     }); 
 }).catch(err => {
     console.log(err);
@@ -40,4 +41,16 @@ form.addEventListener('submit', e => {
     }).catch(err => {
         console.log(err);
     });
+});
+
+// deleting document
+list.addEventListener('click', e => {
+    if(e.target.tagName === 'BUTTON'){
+        const id = e.target.parentElement.getAttribute('data-id');
+        db.collection('recipes').doc(id).delete().then(() => {
+            console.log('recipe deleted')
+        }).catch(err => {
+            console.log(err);
+        });        
+    }
 });
