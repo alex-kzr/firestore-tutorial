@@ -5,6 +5,7 @@ const db = firebase.firestore();
 
 const list = document.querySelector('ul');
 const form = document.querySelector('form');
+const button = document.querySelector('button');
 
 const addRecipe = (recipe, id) => {
     let html = `
@@ -28,7 +29,7 @@ const deleteRecipe = id => {
 };
 
 // get documents
-db.collection('recipes').onSnapshot(snapshot => {
+const unsub = db.collection('recipes').onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
         if(change.type === 'added'){
             addRecipe(change.doc.data(), change.doc.id);
@@ -66,4 +67,11 @@ list.addEventListener('click', e => {
             console.log(err);
         });        
     }
+});
+
+// unsub from database changes
+button.addEventListener('click', e => {
+    e.preventDefault();
+    unsub();
+    console.log('unsubscribed from collection changes');
 });
